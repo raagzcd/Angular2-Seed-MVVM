@@ -353,10 +353,21 @@ System.config({
   }
 }());
 
-System.import('./Modules/Shell/Views/Shell')
+System.import('./App/Config/Initialize')
   .catch(e => console.error(e,
     'Report this error at https://github.com/xnramx/Angular2-Seed-MVVM/issues'));
-    
+     
+EOF
+
+cat > $1/Development/SRC/APP/Config/Initialize.ts << EOF 
+
+import {Component, View, bootstrap, NgFor} from 'angular2/angular2';
+import {RouteConfig, RouterOutlet, RouterLink, routerInjectables} from 'angular2/router';
+
+import {Shell} from 'Modules/Shell/Views/ShellView';
+
+bootstrap(Shell.Views.ShellView, [routerInjectables]);
+
 EOF
 
 cat > $1/Development/SRC/Modules/Common/Views/ViewBase.ts << EOF
@@ -385,10 +396,18 @@ EOF
 
 cat > $1/Development/SRC/Modules/SampleModule/Services/NameList.ts << EOF
 
+import {bind, Inject, Binding} from 'angular2/angular2';
+
 export module SampleModule.Services
 {
   export class NamesList 
   {
+    //#region Static Properties
+    
+    public static Injectables: Binding[] = [bind(NamesList).toClass(NamesList)];
+    
+    //#endregion
+    
     //#region Properties
     
     public Names: Array<string>;
@@ -421,6 +440,7 @@ export module SampleModule.Services
   }
 }
 
+
 EOF
 
 cat > $1/Development/SRC/Modules/SampleModule/ViewModels/SampleViewModel.ts << EOF
@@ -435,9 +455,8 @@ export module SampleModule.ViewModels
 	{
 		//#region Static
 		
-		public static Injectables: Binding[] = [
-			bind(SampleViewModel).toClass(SampleViewModel),
-			bind(SampleModuleNameList.Services.NamesList).toClass(SampleModuleNameList.Services.NamesList)];
+		public static Injectables: Binding[] = [bind(SampleViewModel).toClass(SampleViewModel)].concat(
+			SampleModuleNameList.Services.NamesList.Injectables);
 		
 		//#endregion
 		
@@ -468,6 +487,7 @@ export module SampleModule.ViewModels
 		//#endregion
 	}
 }
+
 EOF
 
 cat > $1/Development/SRC/Modules/SampleModule/ViewModels/SampleViewModel1.ts << EOF
@@ -481,9 +501,8 @@ export module SampleModule.ViewModels
 	{
 		//#region Static
 		
-		public static Injectables: Binding[] = [
-			bind(SampleViewModel1).toClass(SampleViewModel1),
-			bind(SampleModuleNameList.Services.NamesList).toClass(SampleModuleNameList.Services.NamesList)];
+		public static Injectables: Binding[] = [bind(SampleViewModel1).toClass(SampleViewModel1)].concat(
+			SampleModuleNameList.Services.NamesList.Injectables);
 		
 		//#endregion
 		
@@ -514,6 +533,7 @@ export module SampleModule.ViewModels
 		//#endregion
 	}
 }
+
 EOF
 
 
@@ -634,7 +654,7 @@ cat > $1/Development/SRC/Modules/SampleModule/Views/SampleView1.html << EOF
 
 EOF
 
-cat > $1/Development/SRC/Modules/Shell/Views/Shell.html << EOF
+cat > $1/Development/SRC/Modules/Shell/Views/ShellView.html << EOF
 <section class="shell">
   <nav>
     <a router-link="sample">Sample</a>
@@ -645,7 +665,7 @@ cat > $1/Development/SRC/Modules/Shell/Views/Shell.html << EOF
 </section>
 EOF
 
-cat > $1/Development/SRC/Modules/Shell/Views/Shell.ts << EOF
+cat > $1/Development/SRC/Modules/Shell/Views/ShellView.ts << EOF
 /// <reference path="../../../../typings/tsd.d.ts" />
 import {Component, View, bootstrap, NgFor} from 'angular2/angular2';
 import {RouteConfig, RouterOutlet, RouterLink, routerInjectables} from 'angular2/router';
@@ -653,23 +673,24 @@ import {RouteConfig, RouterOutlet, RouterLink, routerInjectables} from 'angular2
 import {SampleModule} from 'Modules/SampleModule/Views/SampleView';
 import {SampleModule as SampleModule1} from 'Modules/SampleModule/Views/SampleView1';
 
-@Component({
-  selector: 'shell'
-})
-
-@RouteConfig([
-  { path: '/', component: SampleModule.Views.SampleView, as: 'sample' },
-  { path: '/sample1', component: SampleModule1.Views.SampleView1, as: 'sample1' }
-])
-
-@View({
-  templateUrl: './Modules/Shell/Views/Shell.html?v=<%= VERSION %>',
-  directives: [RouterOutlet, RouterLink]
-})
-class Shell {}
-
-
-bootstrap(Shell, [routerInjectables]);
+export module Shell.Views
+{
+  @Component({
+    selector: 'shell'
+  })
+  
+  @RouteConfig([
+    { path: '/', component: SampleModule.Views.SampleView, as: 'sample' },
+    { path: '/sample1', component: SampleModule1.Views.SampleView1, as: 'sample1' }
+  ])
+  
+  @View({
+    templateUrl: './Modules/Shell/Views/ShellView.html?v=<%= VERSION %>',
+    directives: [RouterOutlet, RouterLink]
+  })
+  
+  export class ShellView {}
+}
 EOF
 
 cat > $1/Development/SRC/index.html << EOF

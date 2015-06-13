@@ -1,8 +1,16 @@
 
+import {bind, Inject, Binding} from 'angular2/angular2';
+
 export module SampleModule.Services
 {
   export class NamesList 
   {
+    //#region Static Properties
+    
+    public static Injectables: Binding[] = [bind(NamesList).toClass(NamesList)];
+    
+    //#endregion
+    
     //#region Properties
     
     public Names: Array<string>;

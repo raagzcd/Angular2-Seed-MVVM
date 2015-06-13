@@ -8,9 +8,8 @@ export module SampleModule.ViewModels
 	{
 		//#region Static
 		
-		public static Injectables: Binding[] = [
-			bind(SampleViewModel1).toClass(SampleViewModel1),
-			bind(SampleModuleNameList.Services.NamesList).toClass(SampleModuleNameList.Services.NamesList)];
+		public static Injectables: Binding[] = [bind(SampleViewModel1).toClass(SampleViewModel1)].concat(
+			SampleModuleNameList.Services.NamesList.Injectables);
 		
 		//#endregion
 		
