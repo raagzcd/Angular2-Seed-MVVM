@@ -19,7 +19,7 @@ declare -a branchs=("Development")
 declare -a compile=("/SRC" "/Build")
 declare -a paths=("/App/Libs" "/App/Styles" "/App/Config" "/App/Images" "/Modules/Common/Views" 
   "/Modules/SampleModule/Services" "/Modules/SampleModule/ViewModels" "/Modules/SampleModule/Views"
-  "/Modules/Shell/ViewModels" "/Modules/Shell/Views")
+  "/Shell/ViewModels" "/Shell/Views")
 
 echo "[1] Creating Folders"
 
@@ -360,14 +360,12 @@ System.import('./App/Config/Initialize')
 EOF
 
 cat > $1/Development/SRC/APP/Config/Initialize.ts << EOF 
-
 import {Component, View, bootstrap, NgFor} from 'angular2/angular2';
 import {RouteConfig, RouterOutlet, RouterLink, routerInjectables} from 'angular2/router';
 
-import {Shell} from 'Modules/Shell/Views/ShellView';
+import {Shell} from 'Shell/Views/ShellView';
 
-bootstrap(Shell.Views.ShellView, [routerInjectables]);
-
+bootstrap(Shell.Views.ShellView, [routerInjectables, Shell.Views.ShellView.InjectableServices]);
 EOF
 
 cat > $1/Development/SRC/Modules/Common/Views/ViewBase.ts << EOF
@@ -393,6 +391,21 @@ export module Common.Views
 }
 EOF
 
+
+cat > $1/Development/SRC/Modules/SampleModule/SampleModule.ts << EOF 
+
+import {bind, Inject, Binding} from 'angular2/angular2';
+import {SampleModule as SampleModuleNL} from 'Modules/SampleModule/Services/NameList';
+
+export module SampleModule
+{
+	export class Sample
+	{
+		public static InjectableServices: Binding[] = SampleModuleNL.Services.NamesList.Injectables;
+	}
+}
+
+EOF
 
 cat > $1/Development/SRC/Modules/SampleModule/Services/NameList.ts << EOF
 
@@ -455,8 +468,7 @@ export module SampleModule.ViewModels
 	{
 		//#region Static
 		
-		public static Injectables: Binding[] = [bind(SampleViewModel).toClass(SampleViewModel)].concat(
-			SampleModuleNameList.Services.NamesList.Injectables);
+		public static Injectables: Binding[] = [bind(SampleViewModel).toClass(SampleViewModel)];
 		
 		//#endregion
 		
@@ -501,8 +513,7 @@ export module SampleModule.ViewModels
 	{
 		//#region Static
 		
-		public static Injectables: Binding[] = [bind(SampleViewModel1).toClass(SampleViewModel1)].concat(
-			SampleModuleNameList.Services.NamesList.Injectables);
+		public static Injectables: Binding[] = [bind(SampleViewModel1).toClass(SampleViewModel1)];
 		
 		//#endregion
 		
@@ -654,7 +665,7 @@ cat > $1/Development/SRC/Modules/SampleModule/Views/SampleView1.html << EOF
 
 EOF
 
-cat > $1/Development/SRC/Modules/Shell/Views/ShellView.html << EOF
+cat > $1/Development/SRC/Shell/Views/ShellView.html << EOF
 <section class="shell">
   <nav>
     <a router-link="sample">Sample</a>
@@ -665,13 +676,16 @@ cat > $1/Development/SRC/Modules/Shell/Views/ShellView.html << EOF
 </section>
 EOF
 
-cat > $1/Development/SRC/Modules/Shell/Views/ShellView.ts << EOF
-/// <reference path="../../../../typings/tsd.d.ts" />
+cat > $1/Development/SRC/Shell/Views/ShellView.ts << EOF
+/// <reference path="../../../typings/tsd.d.ts" />
 import {Component, View, bootstrap, NgFor} from 'angular2/angular2';
 import {RouteConfig, RouterOutlet, RouterLink, routerInjectables} from 'angular2/router';
+import {bind, Inject, Binding} from 'angular2/angular2';
 
 import {SampleModule} from 'Modules/SampleModule/Views/SampleView';
 import {SampleModule as SampleModule1} from 'Modules/SampleModule/Views/SampleView1';
+import {SampleModule as Sample} from 'Modules/SampleModule/SampleModule';
+
 
 export module Shell.Views
 {
@@ -681,15 +695,17 @@ export module Shell.Views
   
   @RouteConfig([
     { path: '/', component: SampleModule.Views.SampleView, as: 'sample' },
-    { path: '/sample1', component: SampleModule1.Views.SampleView1, as: 'sample1' }
+    { path: '/#sample1', component: SampleModule1.Views.SampleView1, as: 'sample1' }
   ])
   
   @View({
-    templateUrl: './Modules/Shell/Views/ShellView.html?v=<%= VERSION %>',
+    templateUrl: './Shell/Views/ShellView.html?v=<%= VERSION %>',
     directives: [RouterOutlet, RouterLink]
   })
   
-  export class ShellView {}
+  export class ShellView {
+		public static InjectableServices: Binding[] = Sample.Sample.InjectableServices;
+  }
 }
 EOF
 

@@ -8,8 +8,7 @@ export module SampleModule.ViewModels
 	{
 		//#region Static
 		
-		public static Injectables: Binding[] = [bind(SampleViewModel1).toClass(SampleViewModel1)].concat(
-			SampleModuleNameList.Services.NamesList.Injectables);
+		public static Injectables: Binding[] = [bind(SampleViewModel1).toClass(SampleViewModel1)];
 		
 		//#endregion
 		
@@ -40,3 +39,4 @@ export module SampleModule.ViewModels
 		//#endregion
 	}
 }
+

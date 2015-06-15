@@ -16,3 +16,4 @@ System.config({
 System.import('./App/Config/Initialize')
   .catch(e => console.error(e,
     'Report this error at https://github.com/xnramx/Angular2-Seed-MVVM/issues'));
+     
